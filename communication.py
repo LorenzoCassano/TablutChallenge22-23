@@ -23,10 +23,10 @@ class Connector:
         """
         if self.color == 'WHITE':
             # Connect the socket to the port where the server is listening
-            server_address = (self.server_ip, 5800)
+            server_address = (self.address, 5800)
         elif self.color == 'BLACK':
             #  Connect the socket to the port where the server is listening
-            server_address = (self.server_ip, 5801)
+            server_address = (self.address, 5801)
         else:
             raise Exception("If you play you could only be white or black")
         # Enstablish connection
@@ -37,7 +37,7 @@ class Connector:
         # '>i' means Big Endian(used in network), integer returns a bytes object. 
         self.sock.send(struct.pack('>i', len(self.name)))
         self.sock.send(self.name.encode())
-
+        #print("Sto inviando")
 
     def recbytes(self, n):
         # Helper function to recv n bytes or return None if EOF is hit
@@ -69,7 +69,7 @@ class Connector:
         """
         Input: string move: (from, to)
         This method sends the move to a Server in the following template:
-            from: letter + number, the letter identifies the column and the numer identifies the row
+            from: letter + number, the letter identifies the column and the number identifies the row
             to: letter + number, same structure
         
         """
