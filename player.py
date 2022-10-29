@@ -25,28 +25,34 @@ class Player:
             for j in range(0, 9):
                 if (i, j) in BLACK:
                     self.board[i][j] = 2
-                elif (i, j) in WHITE: self.board[i][j] = 1
+                elif (i, j) in WHITE:
+                    self.board[i][j] = 1
                 elif i == j == 4:
                     self.board[i][j] = 3
                 else:
                     self.board[i][j] = 0
         print(self.board)
 
+    '''
+    legal moves are stored into dictionaries, 2 for the white player(white pawns, king pawn) and 1 for the balck player
+    Legal moves white pawns:
+      {(coordXPawn,coordYPawn):[(coordXLegalMove,coordYLegalMove),(),...]}
+    '''
     def legalMoves(self):
         if self.color == 'BLACK':
             return self.legal_Black_Moves()
         else:
-            return self.legal_White_Moves()
-
+            return self.legal_White_Moves(), self.legal_King_Moves()
     def legal_White_Moves(self):
 
         legal_Moves = {}
         for i in range(0, 9):
             for j in range(0, 9):
                 if self.board[i][j] == 1:
-                    legal_Moves[(i, j)] = []
-                    self.check_Horizontal_moves((i, j))
-
+                    moves_horizontal_white = self.check_Horizontal_moves((i, j))
+                    moves_vertical_white = self.check_Vertical_moves((i, j))
+                    legal_Moves[(i,j)] = moves_horizontal_white + moves_vertical_white
+        return legal_Moves
     def check_Horizontal_moves(self,pos):
         x = pos[0]
         y = pos[1]
@@ -63,7 +69,7 @@ class Player:
             elif self.board[x][i] == 3:
                 break
             else:
-                moves.append([x, i])
+                moves.append((x, i))
         for i in range(y + 1, 9):
             if (x, i) in BLOCKED_MOVES_WHITE_PLAYER:
                 break
@@ -74,11 +80,51 @@ class Player:
             elif self.board[x][i] == 3:
                 break
             else:
-                moves.append([x, i])
-        print('legal moves for white(', x, ',', y, ') = ', moves)
+                moves.append((x, i))
+        return moves
+    def check_Vertical_moves(self, pos):
+        x = pos[0]
+        y = pos[1]
+
+        moves = []
+        for i in range(x - 1, -1, -1):
+            if (i, y) in BLOCKED_MOVES_WHITE_PLAYER:
+                break
+            elif self.board[i][y] == 1:
+                break
+            elif self.board[i][y] == 2:
+                break
+            elif self.board[i][y] == 3:
+                break
+            else:
+                moves.append((i, y))
+        for i in range(x + 1, 9):
+            if (i, y) in BLOCKED_MOVES_WHITE_PLAYER:
+                break
+            elif self.board[i][y] == 1:
+                break
+            elif self.board[i][y] == 2:
+                break
+            elif self.board[i][y] == 3:
+                break
+            else:
+                moves.append((i, y))
+        return moves
+
+    def legal_King_Moves(self):
+        legal_Moves = {}
+        for i in range(0, 9):
+            for j in range(0, 9):
+                if self.board[i][j] == 3:
+                    moves_horizontal_white = self.check_Horizontal_moves((i, j))
+                    moves_vertical_white = self.check_Vertical_moves((i, j))
+                    legal_Moves[(i, j)] = moves_horizontal_white + moves_vertical_white
+        return legal_Moves
     def legal_Black_Moves(self):
         pass
 
 
 p = Player('WHITE', 0, np.zeros((9, 9)))
-p.legalMoves()
+white,king = p.legalMoves()
+print('legal moves for white :\n', white)
+print('\nlegal moves for king:\n', king)
