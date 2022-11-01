@@ -1,4 +1,5 @@
 import numpy as np
+from utils import num_to_alphanumeric
 
 BLOCKED_MOVES = \
     ((0, 3), (0, 4), (0, 5), (1, 4), (3, 0), (4, 0), (5, 0), (4, 1), (8, 3), (8, 4), (8, 5), (7, 4), (4, 7), (3, 8), (4, 8), (5, 8),
@@ -16,7 +17,7 @@ CAMPS = (((0, 3), (0, 4), (0, 5), (1, 4)),
 
 class Player:
 
-    def __init__(self, color, timeout, board= np.zeros((9, 9), dtype=int)):
+    def __init__(self, color, timeout, board = np.zeros((9, 9), dtype=int)):
         self.color = color
         self.timeout = timeout
         self.board = board
@@ -32,12 +33,49 @@ class Player:
                     self.board[i][j] = 0
         print(self.board)
 
-    '''
-    legal moves are stored into dictionaries, 2 for the white player(white pawns, king pawn) and 1 for the balck player
-    Legal moves white pawns:
-      {(coordXPawn,coordYPawn):[(coordXLegalMove,coordYLegalMove),(),...]}
-    '''
+    def set_board(self, board):
+        ''' 
+        Update the board state
+        '''
+        self.board = board
+    
+    def print_legal_moves(self):
+        ''' 
+        It gets all the legal moves, convert to alphanumeric and print it
+        '''
+        alpha_moves = []
+        if self.color == 'WHITE':
+            soldier_moves, king_moves = self.legalMoves()
+            # Cycle over the soldiers
+            for fr in soldier_moves:
+                # Cycle over the possible moves of him
+                for to in soldier_moves[fr]:
+                    move = num_to_alphanumeric((fr, to))
+                    alpha_moves.append(move)
+            # Repeat with king
+            for fr in king_moves:
+                for to in king_moves[fr]:
+                    move = num_to_alphanumeric((fr, to))
+                    alpha_moves.append(move)
+
+        elif self.color == 'BLACK':
+            soldier_moves = self.legalMoves()
+            # Cycle over the soldiers
+            for fr in soldier_moves:
+                # Cycle over the possible moves of him
+                for to in soldier_moves[fr]:
+                    move = num_to_alphanumeric((fr, to))
+                    alpha_moves.append(move)
+        print(alpha_moves)
+                    
+                
+
     def legalMoves(self):
+        '''
+        legal moves are stored into dictionaries, 2 for the white player(white pawns, king pawn) and 1 for the balck player
+        Legal moves white pawns:
+        {(coordXPawn,coordYPawn):[(coordXLegalMove,coordYLegalMove),(),...]}
+        '''
         if self.color == 'BLACK':
             return self.legal_Black_Moves()
         else:
@@ -186,13 +224,16 @@ class Player:
         return legal_Moves        
                 
                     
-p = Player('WHITE', 0, np.zeros((9, 9), dtype=int))
-white,king = p.legalMoves()
-print('legal moves for white :\n', white)
-print('\nlegal moves for king:\n', king)
+# p = Player('WHITE', 0, np.zeros((9, 9), dtype=int))
+# white,king = p.legalMoves()
+# print('legal moves for white :\n', white)
+# print('\nlegal moves for king:\n', king)
+# p.print_legal_moves()
 
-b = Player('BLACK', 0)
-black = b.legalMoves()
-print('legal moves for black: \n')
-for k in black:
-    print(f"{k} = {black[k]}")
+# b = Player('BLACK', 0)
+# black = b.legalMoves()
+# print('legal moves for black: \n')
+# for k in black:
+#     print(f"{k} = {black[k]}")
+
+
