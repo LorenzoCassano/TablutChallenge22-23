@@ -23,8 +23,6 @@ is preferible because black cannot be eaten and has the power to eat 2 opponent'
 
 ## For White
 
-Positions (2, 2), (6, 6), (2, 6), (6, 2) are more difficult to tackle
-
 Move the king only if the opponent checkers are very few
 
 if black has the bridge position, respond blocking
@@ -37,3 +35,15 @@ c _ _ _ _ _ _ _ c
 _ _ _ _ _ _ _ _ _
 _ _ _ _ c _ _ _ _
 _ _ _ c c _ _ _ _
+
+
+_ _ _ w _ _ _
+_ _ _ w1 _ _ _
+_ w w1 k w1 w _
+_ _ _ w1 _ _ _
+_ _ _ w _ _ _
+
+w has to form the bridge
+w1 has to protect from opponent bridge
+MOVE w FIRST
+
