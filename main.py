@@ -3,8 +3,9 @@ Main file of tablut engine, take in input IP-address, color and time.
 '''
 
 import sys
-from utils import num_to_alphanumeric
+from utils import num_to_alphanumeric, alphanumeric_to_num
 from communication import Connector
+from player import Player
 
 def help():
     print("This is the MbAppe Algorithm which is able to play to Tablut\n")
@@ -36,7 +37,7 @@ def main():
         server_address = sys.argv[3]
     else:
         server_address = 'localhost'
-
+   
     print("\nConnection to: " + server_address)
     connector = Connector(name, color, server_address)
     connector.connection()
@@ -46,12 +47,25 @@ def main():
     board, king_position = connector.get_state()
     print(board)
 
+    
+    player = Player(color, timeout, board)
     # ONLY IF WE HAVE TO DO THE FIRST MOVE
     if color == "WHITE":
-        # sending a move
+        
+
+        
+        # Show the legal moves
+        print('Legal Moves')
+        player.print_legal_moves()
+        
+
+        # Send a move
         print("Insert a move: you have to insert the from first, and the final  position")
         fr = input("Insert the starting position (corresponds to our from) ")
         to = input("Insert the final position (corresponds to our to) ")
+        
+        
+        
         connector.send_move((fr, to))
         board, king_position = connector.get_state()
         print("Board after move")
@@ -63,6 +77,11 @@ def main():
         print("Wating enemy move")
         board, king_position = connector.get_state()
         print("Current board\n", board)
+
+        player.set_board(board)
+        print('Legal Moves')
+        player.print_legal_moves()
+
         # Trying first move
         print("Insert a move: you have to insert the from first, and the final  position")
         fr = input("Insert the starting position (corresponds to our from) ")
