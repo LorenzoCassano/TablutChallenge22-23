@@ -136,7 +136,7 @@ class State_Manager:
         for i in range(0, 9):
             for j in range(0, 9):
                 if board[i][j] == 3:
-                    moves_horizontal_white = self.check_Horizontal_moves((board, i, j))
+                    moves_horizontal_white = self.check_Horizontal_moves(board,(i, j))
                     moves_vertical_white = self.check_Vertical_moves(board, (i, j))
                     legal_Moves[(i, j)] = moves_horizontal_white + moves_vertical_white
         return legal_Moves
@@ -257,16 +257,20 @@ class State_Manager:
         board[move[1]] = pawn
         board[move[0]] = 0
 
-# p = Player('WHITE', 0, np.zeros((9, 9), dtype=int))
-# white,king = p.legalMoves()
-# print('legal moves for white :\n', white)
-# print('\nlegal moves for king:\n', king)
-# p.print_legal_moves()
+    def get_standard_moves(self, board):
+        """
+        FARE IL MERGE DEI DUE DIZIONARI SE IL COLORE E' BIANCO
+        """
+        if self.color == "WHITE":
+            dict_moves = self.legalMoves(board)
+            moves =
+        moves = self.legalMoves(board)
+        standard_moves = []
+        print("Sono qui moves = ",moves)
+        for start in moves.keys():
+            for end in moves[start]:
+                standard_moves.append((start, end))
+        return standard_moves
 
-# b = Player('BLACK', 0)
-# black = b.legalMoves()
-# print('legal moves for black: \n')
-# for k in black:
-#     print(f"{k} = {black[k]}")
 
 

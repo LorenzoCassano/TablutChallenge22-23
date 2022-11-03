@@ -53,12 +53,13 @@ def main():
     # ONLY IF WE HAVE TO DO THE FIRST MOVE
 
     # Start to play until goal is found or time finishes
+
     while True:
       # First, get the state from the server and convert it.
         state = GameState(to_move=color,
                           utility= player.manager.goal_state(board),
                           board= board,
-                         moves= player.get_standard_moves(player.manager.legalMoves(board)))
+                         moves= player.manager.get_standard_moves(board))
 
 
         # Trying first move

@@ -8,20 +8,13 @@ class TablutGame(Game):
         self.initial = GameState(to_move=color,
                                  utility=self.manager.goal_state(board),
                                  board= board,
-                                 moves=self.get_standard_moves(self.manager.legalMoves(board)))
+                                 moves=self.manager.get_standard_moves(board) )
         self.timeout = timeout
-
-    def get_standard_moves(self, moves):
-        standard_moves = []
-        for start in moves.keys():
-            for end in moves[start]:
-                standard_moves.append((start, end))
-        return standard_moves
 
 
     def actions(self, state):
         """Return a list of the allowable moves at this point."""
-        return self.get_standard_moves(self.manager.legalMoves(state.board))
+        return self.manager.get_standard_moves(state.board)
 
 
     def result(self, state, move):
@@ -35,7 +28,7 @@ class TablutGame(Game):
         return GameState(to_move=new_color,
                          utility=self.manager.goal_state(board),
                          board= board, # mettere quella nuova
-                         moves=self.get_standard_moves(self.manager.legalMoves(board)))
+                         moves=self.manager.get_standard_moves(board))
 
 
 
