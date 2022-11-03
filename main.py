@@ -5,15 +5,17 @@ Main file of tablut engine, take in input IP-address, color and time.
 import sys
 from utils import num_to_alphanumeric, alphanumeric_to_num
 from communication import Connector
-from player import Player
+from state_manager import State_Manager
+from aima.games import *
+from engine.game import TablutGame
 
 def help():
     print("This is the MbAppe Algorithm which is able to play to Tablut\n")
     print("To play is necessary to run Tablut Server and to use the following parameters:")
     print("-color must be 'WHITE' or 'BLACK'\n-timeout\n-server address is optional, default value is 'localhost'")
 
-def main():
 
+def main():
     # Checking principal arguments
     try:
         color = sys.argv[1]
@@ -37,7 +39,7 @@ def main():
         server_address = sys.argv[3]
     else:
         server_address = 'localhost'
-   
+
     print("\nConnection to: " + server_address)
     connector = Connector(name, color, server_address)
     connector.connection()
@@ -47,64 +49,39 @@ def main():
     board, king_position = connector.get_state()
     print(board)
 
-    
-    player = Player(color, timeout, board)
+    player = TablutGame(color, timeout, board, king_position)
     # ONLY IF WE HAVE TO DO THE FIRST MOVE
-    if color == "WHITE":
-        
-
-        
-        # Show the legal moves
-        print('Legal Moves')
-        player.print_legal_moves()
-        
-
-        # Send a move
-        print("Insert a move: you have to insert the from first, and the final  position")
-        fr = input("Insert the starting position (corresponds to our from) ")
-        to = input("Insert the final position (corresponds to our to) ")
-        
-        
-        
-        connector.send_move((fr, to))
-        board, king_position = connector.get_state()
-        print("Board after move")
-        print(board)
 
     # Start to play until goal is found or time finishes
     while True:
-        # First, get the state from the server and convert it.
-        print("Wating enemy move")
-        board, king_position = connector.get_state()
-        print("Current board\n", board)
+      # First, get the state from the server and convert it.
+        state = GameState(to_move=color,
+                          utility= player.manager.goal_state(board),
+                          board= board,
+                         moves= player.get_standard_moves(player.manager.legalMoves(board)))
 
-        player.set_board(board)
-        print('Legal Moves')
-        player.print_legal_moves()
 
         # Trying first move
-        print("Insert a move: you have to insert the from first, and the final  position")
-        fr = input("Insert the starting position (corresponds to our from) ")
-        to = input("Insert the final position (corresponds to our to) ")
-        connector.send_move((fr, to))
+        move = alpha_beta_cutoff_search(state, player, 4)
+        print(move)
+        connector.send_move(move)
         board, king_position = connector.get_state()
         print("Board after move")
         print(board)
+        print("Waiting for enemy move....")
+        board, king_position = connector.get_state()
+        print("Enemy move:")
+        print(board)
+    # Then, start the search for the best move
 
-       # Then, start the search for the best move
+    # algorithm computes move --> [(i,j),(x,y)]
+    # convertion in a string tuple [(from, to)]
+    # sending move
 
-       # algorithm computes move --> [(i,j),(x,y)]
-       # convertion in a string tuple [(from, to)]
-       # sending move
+    # Convert the move into alphanumerical value
 
-       # Convert the move into alphanumerical value
-
-       # Send the move
-       #pass
+    # Send the move
+    # pass
 
 
 main()
-
-       
-       
-
