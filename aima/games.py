@@ -4,7 +4,7 @@ import copy
 import itertools
 import random
 from collections import namedtuple
-
+import time
 import numpy as np
 
 from aima.utils import vector_add
@@ -160,6 +160,7 @@ def alpha_beta_cutoff_search(state, game, d=4, cutoff_test=None, eval_fn=None):
     # The default test cuts off at depth d or at a terminal state
     cutoff_test = (cutoff_test or (lambda state, depth: depth > d or game.terminal_test(state)))
     eval_fn = eval_fn or (lambda state: game.utility(state, player))
+    start = time.time()
     best_score = -np.inf
     beta = np.inf
     best_action = None
@@ -168,7 +169,8 @@ def alpha_beta_cutoff_search(state, game, d=4, cutoff_test=None, eval_fn=None):
         if v > best_score:
             best_score = v
             best_action = a
-    return best_action
+    time_cost = start - time.time()
+    return best_action, time_cost
 
 
 # ______________________________________________________________________________

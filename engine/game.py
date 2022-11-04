@@ -3,17 +3,17 @@ from state_manager import State_Manager
 
 class TablutGame(Game):
 
-    def __init__(self, color, timeout, board, king_postion):
-        self.manager = State_Manager(color, timeout, king_postion)
+    def __init__(self, color, board, king_postion):
+        self.manager = State_Manager(color, king_postion)
         self.initial = GameState(to_move=color,
                                  utility=self.manager.goal_state(board),
                                  board= board,
-                                 moves=self.manager.get_standard_moves(board) )
-        self.timeout = timeout
+                                 moves=self.manager.get_standard_moves(board))
 
 
     def actions(self, state):
         """Return a list of the allowable moves at this point."""
+        self.manager.set_color(state.to_move)
         return self.manager.get_standard_moves(state.board)
 
 
@@ -25,6 +25,7 @@ class TablutGame(Game):
 
         new_color = ("BLACK" if state.to_move == "WHITE" else "WHITE")
         self.manager.set_color(new_color)
+        #print("NELL'ALBERO SONO IL COLORE ",self.manager.color)
         return GameState(to_move=new_color,
                          utility=self.manager.goal_state(board),
                          board= board, # mettere quella nuova

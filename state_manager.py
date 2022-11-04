@@ -21,9 +21,8 @@ GOAL = ((0, 1), (0, 2), (0, 6), (0, 7),
 
 class State_Manager:
 
-    def __init__(self, color, timeout, king_position = (4,4)):
+    def __init__(self, color, king_position = (4,4)):
         self.color = color
-        self.timeout = timeout
         self.king_position = king_position
 
     def set_color(self, color):
@@ -257,20 +256,28 @@ class State_Manager:
         board[move[1]] = pawn
         board[move[0]] = 0
 
-    def get_standard_moves(self, board):
+    def convert_list_moves(self, moves):
         """
-        FARE IL MERGE DEI DUE DIZIONARI SE IL COLORE E' BIANCO
+        This method converts a dict of moves in a list of moves
+        Ex
+        input = {(a,b): [(c,d), (e,f)]
+        output [((a,b),(c,d),((a,b),(e,f))]
         """
-        if self.color == "WHITE":
-            dict_moves = self.legalMoves(board)
-            moves =
-        moves = self.legalMoves(board)
-        standard_moves = []
-        print("Sono qui moves = ",moves)
+        convert_moves = []
         for start in moves.keys():
             for end in moves[start]:
-                standard_moves.append((start, end))
-        return standard_moves
+                convert_moves.append((start, end))
+        return convert_moves
+
+    def get_standard_moves(self, board):
+        if self.color == "WHITE":
+            moves_pawn, moves_king = self.legalMoves(board)[0], self.legalMoves(board)[1]
+            return self.convert_list_moves(moves_pawn) + self.convert_list_moves(moves_king)
+        # if color is black only pawn moves
+        return self.convert_list_moves(self.legalMoves(board))
+
+
+
 
 
 

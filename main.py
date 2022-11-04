@@ -47,12 +47,19 @@ def main():
     # Starting game
     print("Initial state:")
     board, king_position = connector.get_state()
+    print("Initial board")
     print(board)
 
-    player = TablutGame(color, timeout, board, king_position)
+    player = TablutGame(color, board, king_position)
     # ONLY IF WE HAVE TO DO THE FIRST MOVE
 
     # Start to play until goal is found or time finishes
+    if color == "BLACK":
+        # we wanting the initial state
+        # White player has to do the first mo ve
+        board, king_position = connector.get_state()
+        print("Board after enemy moves")
+        print(board)
 
     while True:
       # First, get the state from the server and convert it.
@@ -61,10 +68,11 @@ def main():
                           board= board,
                          moves= player.manager.get_standard_moves(board))
 
-
         # Trying first move
-        move = alpha_beta_cutoff_search(state, player, 4)
-        print(move)
+        move, time_cost = alpha_beta_cutoff_search(state, player, 4)
+        move = num_to_alphanumeric(move)
+        print("Move choice ",move)
+        print("Time to compute the move ",round(time_cost,2))
         connector.send_move(move)
         board, king_position = connector.get_state()
         print("Board after move")
@@ -73,6 +81,7 @@ def main():
         board, king_position = connector.get_state()
         print("Enemy move:")
         print(board)
+
     # Then, start the search for the best move
 
     # algorithm computes move --> [(i,j),(x,y)]
