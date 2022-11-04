@@ -49,8 +49,8 @@ def alphanumeric_to_num(fr, to):
     return a move in the format :
     [(i, j), (x, y)]
     '''
-    num_fr = conv_to_matrix[fr[0]], int(fr[1]) - 1
-    num_to = conv_to_matrix[to[0]], int(to[1]) - 1 
+    num_fr = int(fr[1]) - 1, conv_to_matrix[fr[0]]
+    num_to = int(to[1]) - 1, conv_to_matrix[to[0]] 
     return (num_fr, num_to)
 
 

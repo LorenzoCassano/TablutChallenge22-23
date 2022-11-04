@@ -80,6 +80,7 @@ class Player:
             return self.legal_Black_Moves()
         else:
             return self.legal_White_Moves(), self.legal_King_Moves()
+    
     def legal_White_Moves(self):
 
         legal_Moves = {}
@@ -90,6 +91,7 @@ class Player:
                     moves_vertical_white = self.check_Vertical_moves((i, j))
                     legal_Moves[(i,j)] = moves_horizontal_white + moves_vertical_white
         return legal_Moves
+    
     def check_Horizontal_moves(self,pos):
         x = pos[0]
         y = pos[1]
@@ -115,6 +117,7 @@ class Player:
             else:
                 moves.append((x, i))
         return moves
+    
     def check_Vertical_moves(self, pos):
         x = pos[0]
         y = pos[1]
@@ -222,8 +225,7 @@ class Player:
                     
                     legal_Moves[(i,j)] = moves
         return legal_Moves        
-                
-                    
+              
 # p = Player('WHITE', 0, np.zeros((9, 9), dtype=int))
 # white,king = p.legalMoves()
 # print('legal moves for white :\n', white)

@@ -6,7 +6,7 @@ import sys
 from utils import num_to_alphanumeric, alphanumeric_to_num
 from communication import Connector
 from player import Player
-
+from update_state import UpdateBoard
 def help():
     print("This is the MbAppe Algorithm which is able to play to Tablut\n")
     print("To play is necessary to run Tablut Server and to use the following parameters:")
@@ -64,13 +64,18 @@ def main():
         fr = input("Insert the starting position (corresponds to our from) ")
         to = input("Insert the final position (corresponds to our to) ")
         
+        num_move = alphanumeric_to_num(fr, to)
+        up_board = UpdateBoard(board, num_move)
+        new_board = up_board.board_updater()
         
+        print("_________________")
         
         connector.send_move((fr, to))
         board, king_position = connector.get_state()
         print("Board after move")
+        
         print(board)
-
+        print(new_board)
     # Start to play until goal is found or time finishes
     while True:
         # First, get the state from the server and convert it.
@@ -86,10 +91,17 @@ def main():
         print("Insert a move: you have to insert the from first, and the final  position")
         fr = input("Insert the starting position (corresponds to our from) ")
         to = input("Insert the final position (corresponds to our to) ")
+        num_move = alphanumeric_to_num(fr, to)
+        up_board = UpdateBoard(board, num_move)
+        new_board = up_board.board_updater()
+        print(new_board)
+        print("_____________")
         connector.send_move((fr, to))
         board, king_position = connector.get_state()
         print("Board after move")
         print(board)
+        print("__________")
+        
 
        # Then, start the search for the best move
 
