@@ -1,23 +1,6 @@
 import numpy as np
-from utils import num_to_alphanumeric, BLACK
-
-BLOCKED_MOVES = ((0, 3), (0, 4), (0, 5), (1, 4), (3, 0), (4, 0), (5, 0), (4, 1), (8, 3), (8, 4), (8, 5), (7, 4),
-                 (4, 7), (3, 8), (4, 8), (5, 8), (4, 4))
-
-STARTING_BLACK = ((0, 3), (0, 4), (0, 5), (1, 4), (3, 0), (4, 0), (5, 0), (4, 1), (8, 3), (8, 4), (8, 5), (7, 4), (4, 7),
-                  (3, 8), (4, 8), (5, 8))
-
-STARTING_WHITE = ((4, 2), (4, 3), (4, 5), (4, 6), (2, 4), (3, 4), (5, 4), (6, 4))
-
-CAMPS = (((0, 3), (0, 4), (0, 5), (1, 4)), 
-         ((3, 0), (4, 0), (5, 0), (4, 1)),
-         ((8, 3), (8, 4), (8, 5), (7, 4)),
-         ((4, 7), (3, 8), (4, 8), (5, 8)))
-
-GOAL = ((0, 1), (0, 2), (0, 6), (0, 7),
-        (8, 1), (8, 2), (8, 6), (8, 7),
-        (1, 0), (2, 0), (6, 0),(7, 0),
-        (1,8), (2, 8), (6, 8), (7,8))
+from utils import *
+import copy
 
 class State_Manager:
 
@@ -67,6 +50,7 @@ class State_Manager:
             return self.legal_Black_Moves(board)
         else:
             return self.legal_White_Moves(board), self.legal_King_Moves(board)
+
     def legal_White_Moves(self, board):
 
         legal_Moves = {}
@@ -77,6 +61,7 @@ class State_Manager:
                     moves_vertical_white = self.check_Vertical_moves(board, (i, j))
                     legal_Moves[(i,j)] = moves_horizontal_white + moves_vertical_white
         return legal_Moves
+
     def check_Horizontal_moves(self,board, pos):
         x = pos[0]
         y = pos[1]
@@ -102,6 +87,7 @@ class State_Manager:
             else:
                 moves.append((x, i))
         return moves
+
     def check_Vertical_moves(self,board, pos):
         x = pos[0]
         y = pos[1]
@@ -130,6 +116,7 @@ class State_Manager:
             else:
                 moves.append((i, y))
         return moves
+
     def legal_King_Moves(self, board):
         legal_Moves = {}
         for i in range(0, 9):
@@ -139,6 +126,7 @@ class State_Manager:
                     moves_vertical_white = self.check_Vertical_moves(board, (i, j))
                     legal_Moves[(i, j)] = moves_horizontal_white + moves_vertical_white
         return legal_Moves
+
     def legal_Black_Moves(self, board):
         legal_Moves = {}
         
@@ -208,7 +196,32 @@ class State_Manager:
                     legal_Moves[(i,j)] = moves
         return legal_Moves
 
-    def goal_state(self, board):
+    def boxscore(self, i, j):
+        if (i, j) in STARTING_BLACK:
+            return 0.012
+        elif (i, j) == (4, 4):
+            return 0.02
+        elif (i, j) in SPECIAL_BOXES:
+            return 0.015
+        else:
+            return 0.01
+
+    def heuristics(self, board):
+        """
+        This function returns a value in the domain [-1, 1] where 1 is for the victory of white (MAX player) and -1 for the victory of black (MIN player).
+        This score is calculated basing on how many checkers are still in the board, and which boxes do they occupy. A different value is assigned to different boxes, basing on the coontrol power that box has on the board.
+        This value is then added to the score if that box is occupied by WHITE, and subtracted if that box is occupied by BLACK.
+        """
+        score = 0
+        for i in range(9):
+            for j in range(9):
+                if board[i, j] in (WHITE, KING):
+                    score += self.boxscore(i, j)
+                elif board[i, j] == BLACK:
+                    score -= self.boxscore(i, j)
+        return score
+
+    def utility_state(self, board):
         # This methods return 1 if WHITE wins, -1 if BLACK wins, otherwise 0
         # Maybe it's possible to identify other values, e.g. 0.3 when eating a pawn
         #   Check if BLACK won
@@ -249,12 +262,172 @@ class State_Manager:
                 return -1
 
         # not in a goal state
-        return 0
+        return self.heuristics(board)
 
-    def make_move(self, board, move):
-        pawn = board[move[0]]
-        board[move[1]] = pawn
-        board[move[0]] = 0
+    def finding_coord(self, board, dest_move):
+        '''
+        return attributes up, down, right, left if are in the board
+        '''
+        coord_to_check = {}
+        if dest_move[0] != 0:
+            coord_to_check["UP"] = (dest_move[0] - 1, dest_move[1])
+        if dest_move[0] != 8:
+            coord_to_check["DOWN"] = (dest_move[0] + 1, dest_move[1])
+        if dest_move[1] != 0:
+            coord_to_check["LEFT"] = (dest_move[0], dest_move[1] - 1)
+        if dest_move[1] != 8:
+            coord_to_check["RIGHT"] = (dest_move[0], dest_move[1] + 1)
+        return coord_to_check
+
+    def check_near_enemies(self,board, dest_move):
+        '''
+        return a list of tuples with the coord of the opponent soldiers that could be taken out (the one near it)
+        (it could be empty)
+        '''
+        enemies = []
+        coord_to_check = self.finding_coord(board, dest_move)
+        if self.color == WHITE:
+            for key in coord_to_check:
+                if board[coord_to_check[key][0], coord_to_check[key][1]] == BLACK:
+                    enemies.append(coord_to_check[key])
+        else:
+            for key in coord_to_check:
+                if board[coord_to_check[key][0], coord_to_check[key][1]] == WHITE or \
+                        board[coord_to_check[key][0], coord_to_check[key][1]] == KING:
+                    enemies.append(coord_to_check[key])
+        return enemies
+
+    def get_direction(self, enemy_spot, dest_move):
+        x_en, y_en = enemy_spot
+        x_al, y_al = dest_move
+        if x_en == x_al:
+            if y_en == y_al + 1:
+                direction = 'RIGHT'
+            else:
+                direction = 'LEFT'
+        else:
+            # Same Y
+            if x_en == x_al + 1:
+                direction = "UP"
+            else:
+                direction = 'DOWN'
+        return direction
+
+    def board_updater(self, board, move):
+        '''
+        return the new state generated by the move
+        '''
+        start_move = move[0]
+        dest_move = move[1]
+        new_board = copy.deepcopy(board)
+        # Lets move the piece
+        new_board[start_move[0], start_move[1]] = EMPTY
+        new_board[dest_move[0], dest_move[1]] = (1 if self.color == WHITE else 0)
+        # Get the near enemies
+        enemies = self.check_near_enemies(board, dest_move)
+        if len(enemies) != 0:
+            for enemy_spot in enemies:
+                if self.take(board,enemy_spot, dest_move):
+                    new_board[enemy_spot[0], enemy_spot[1]] = EMPTY
+        return new_board
+
+    def take(self, board, enemy_spot, dest_move):
+        '''
+        Check if the near enemy has to be taken out
+        '''
+        x = enemy_spot[0]
+        y = enemy_spot[1]
+
+        # FIRST CASE : the opponent which is attacked is the king
+        if board[x, y] == KING:
+            # Check its postition
+            if (x, y) == CASTLE:
+                if board[x + 1, y] == BLACK and \
+                        board[x - 1, y] == BLACK and \
+                        board[x, y + 1] == BLACK and \
+                        board[x, y - 1] == BLACK:
+                    return True
+
+            elif (x, y) in CASTLE_NEIGHBOUR:
+                neighbours_count = 0
+                for coords in CASTLE_NEIGHBOUR:
+                    if board[coords[1], coords[0]] == BLACK:
+                        neighbours_count += 1
+                if neighbours_count >= 3:
+                    return True
+            else:
+                # KING isn't in the castle or in its neighbourhood
+                # He is taken out as a simple soldier
+                direction = self.get_direction(enemy_spot, dest_move)
+                if direction == "UP" and x - 1 >= 0:
+                    if board[x - 1, y] == BLACK or \
+                            (x - 1, y) in CAMPS or \
+                            (x - 1, y) == CASTLE:
+                        return True
+                if direction == "DOWN" and x + 1 <= 8:
+                    if board[x + 1, y] == BLACK or \
+                            (x + 1, y) in CAMPS or \
+                            (x + 1, y) == CASTLE:
+                        return True
+                if direction == "LEFT" and y - 1 >= 0:
+                    if board[x, y - 1] == BLACK or \
+                            (x, y - 1) in CAMPS or \
+                            (x, y - 1) == CASTLE:
+                        return True
+                elif y + 1 <= 8:
+                    if board[x, y + 1] == BLACK or \
+                            (x, y + 1) in CAMPS or \
+                            (x, y + 1) == CASTLE:
+                        take_out = True
+        # SECOND CASE : the opponent which is attacked is a black soldier
+        elif board[enemy_spot[0], enemy_spot[1]] == BLACK:
+            if (x, y) not in CAMPS:
+                direction = self.get_direction(enemy_spot,dest_move)
+                if direction == "UP" and x - 1 >= 0:
+                    if board[x - 1, y] == WHITE or \
+                            (x - 1, y) in CAMPS or \
+                            (x - 1, y) == CASTLE:
+                        return True
+                if direction == "DOWN" and x + 1 <= 8:
+                    if board[x + 1, y] == WHITE or \
+                            (x + 1, y) in CAMPS or \
+                            (x + 1, y) == CASTLE:
+                        return True
+                if direction == "LEFT" and y - 1 >= 0:
+                    if board[x, y - 1] == WHITE or \
+                            (x, y - 1) in CAMPS or \
+                            (x, y - 1) == CASTLE:
+                        return True
+                elif y + 1 <= 8:
+                    if board[x, y + 1] == WHITE or \
+                            (x, y + 1) in CAMPS or \
+                            (x, y - 1) == CASTLE:
+                        return True
+                        # THIRD CASE : the opponent attacked is a white soldier
+        else:
+            # white soldier case
+            direction = self.get_direction(enemy_spot, dest_move)
+            if direction == "UP" and x - 1 >= 0:
+                if board[x - 1, y] == BLACK or \
+                        (x - 1, y) in CAMPS or \
+                        (x - 1, y) == CASTLE:
+                    return True
+            if direction == "DOWN" and x + 1 <= 8:
+                if board[x + 1, y] == BLACK or \
+                        (x + 1, y) in CAMPS or \
+                        (x + 1, y) == CASTLE:
+                    return True
+            if direction == "LEFT" and y - 1 >= 0:
+                if board[x, y - 1] == BLACK or \
+                        (x, y - 1) in CAMPS or \
+                        (x, y - 1) == CASTLE:
+                    return True
+            elif y + 1 <= 8:
+                if board[x, y + 1] == BLACK or \
+                        (x, y + 1) in CAMPS or \
+                        (x, y + 1) == CASTLE:
+                    return True
+        return False
 
     def convert_list_moves(self, moves):
         """
@@ -275,7 +448,6 @@ class State_Manager:
             return self.convert_list_moves(moves_pawn) + self.convert_list_moves(moves_king)
         # if color is black only pawn moves
         return self.convert_list_moves(self.legalMoves(board))
-
 
 
 

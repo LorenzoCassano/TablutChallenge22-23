@@ -6,7 +6,7 @@ class TablutGame(Game):
     def __init__(self, color, board, king_postion):
         self.manager = State_Manager(color, king_postion)
         self.initial = GameState(to_move=color,
-                                 utility=self.manager.goal_state(board),
+                                 utility=self.manager.utility_state(board),
                                  board= board,
                                  moves=self.manager.get_standard_moves(board))
 
@@ -19,16 +19,15 @@ class TablutGame(Game):
 
     def result(self, state, move):
         """Return the state that results from making a move from a state."""
-        # Changing board status -- > Kilian
+
         board = state.board
-        self.manager.make_move(board, move)
+        new_board = self.manager.board_updater(board, move)
 
         new_color = ("BLACK" if state.to_move == "WHITE" else "WHITE")
         self.manager.set_color(new_color)
-        #print("NELL'ALBERO SONO IL COLORE ",self.manager.color)
         return GameState(to_move=new_color,
-                         utility=self.manager.goal_state(board),
-                         board= board, # mettere quella nuova
+                         utility=self.manager.utility_state(board),
+                         board=  new_board, # mettere quella nuova
                          moves=self.manager.get_standard_moves(board))
 
 

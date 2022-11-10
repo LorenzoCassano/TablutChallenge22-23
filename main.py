@@ -64,7 +64,7 @@ def main():
     while True:
       # First, get the state from the server and convert it.
         state = GameState(to_move=color,
-                          utility= player.manager.goal_state(board),
+                          utility= player.manager.utility_state(board),
                           board= board,
                          moves= player.manager.get_standard_moves(board))
 
