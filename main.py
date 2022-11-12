@@ -55,7 +55,7 @@ def main():
 
     # Start to play until goal is found or time finishes
     if color == "BLACK":
-        # we wanting the initial state
+
         # White player has to do the first mo ve
         board, king_position = connector.get_state()
         print("Board after enemy moves")
@@ -64,12 +64,12 @@ def main():
     while True:
       # First, get the state from the server and convert it.
         state = GameState(to_move=color,
-                          utility= player.manager.utility_state(board),
+                          utility= player.manager.heuristics(board),
                           board= board,
-                         moves= player.manager.get_standard_moves(board))
+                         moves= player.manager.legalMoves(board))
 
         # Trying first move
-        move, time_cost = alpha_beta_cutoff_search(state, player, 4)
+        move, time_cost = alpha_beta_cutoff_search(state, player, 3)
         move = num_to_alphanumeric(move)
         print("Move choice ",move)
         print("Time to compute the move ",round(time_cost,2))

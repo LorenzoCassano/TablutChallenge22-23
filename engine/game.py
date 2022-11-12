@@ -6,29 +6,35 @@ class TablutGame(Game):
     def __init__(self, color, board, king_postion):
         self.manager = State_Manager(color, king_postion)
         self.initial = GameState(to_move=color,
-                                 utility=self.manager.utility_state(board),
+                                 utility=self.manager.heuristics(board),
                                  board= board,
-                                 moves=self.manager.get_standard_moves(board))
+                                 moves=self.manager.legalMoves(board))
 
 
     def actions(self, state):
         """Return a list of the allowable moves at this point."""
         self.manager.set_color(state.to_move)
-        return self.manager.get_standard_moves(state.board)
+        return self.manager.legalMoves(state.board)
 
 
     def result(self, state, move):
         """Return the state that results from making a move from a state."""
-
+        #print("Board di valutazione \n")
+        #print(state.board)
         board = state.board
-        new_board = self.manager.board_updater(board, move)
 
+        new_board, win = self.manager.board_updater(board, move)
+        #print(new_board)
+        #print("\n")
         new_color = ("BLACK" if state.to_move == "WHITE" else "WHITE")
+        if win == None:
+            win = self.manager.heuristics(new_board)
+
         self.manager.set_color(new_color)
         return GameState(to_move=new_color,
-                         utility=self.manager.utility_state(board),
-                         board=  new_board, # mettere quella nuova
-                         moves=self.manager.get_standard_moves(board))
+                         utility= win,
+                         board= new_board,
+                         moves=self.manager.legalMoves(new_board))
 
 
 
@@ -40,9 +46,10 @@ class TablutGame(Game):
 
     def terminal_test(self, state):
         """Return True if this is a final state for the game."""
-        return not self.actions(state)
+        return state.utility == 1
+
 
     def to_move(self, state):
         """Return the player whose move it is in this state."""
-        return state.utility != 0
+        return state.to_move
 

@@ -49,17 +49,18 @@ class State_Manager:
         if self.color == 'BLACK':
             return self.legal_Black_Moves(board)
         else:
-            return self.legal_White_Moves(board), self.legal_King_Moves(board)
+            return self.legal_White_Moves(board) + self.legal_King_Moves(board)
 
     def legal_White_Moves(self, board):
 
-        legal_Moves = {}
+        legal_Moves = []
         for i in range(0, 9):
             for j in range(0, 9):
-                if board[i][j] == 1:
+                if board[i,j] == WHITE:
                     moves_horizontal_white = self.check_Horizontal_moves(board, (i, j))
                     moves_vertical_white = self.check_Vertical_moves(board, (i, j))
-                    legal_Moves[(i,j)] = moves_horizontal_white + moves_vertical_white
+                    legal_Moves += moves_horizontal_white + moves_vertical_white
+
         return legal_Moves
 
     def check_Horizontal_moves(self,board, pos):
@@ -72,7 +73,7 @@ class State_Manager:
             if (x, i) in BLOCKED_MOVES:
                 break
             elif board[x][i] == 0:
-                moves.append((x, i))
+                moves.append( ( (x,y),(x,i) ) )
             else:
                 break
         for i in range(y + 1, 9):
@@ -85,7 +86,7 @@ class State_Manager:
             elif board[x][i] == 3:
                 break
             else:
-                moves.append((x, i))
+                moves.append( ( (x,y),(x,i) ) )
         return moves
 
     def check_Vertical_moves(self,board, pos):
@@ -103,7 +104,7 @@ class State_Manager:
             elif board[i][y] == 3:
                 break
             else:
-                moves.append((i, y))
+                moves.append( ( (x,y),(i,y) ) )
         for i in range(x + 1, 9):
             if (i, y) in BLOCKED_MOVES:
                 break
@@ -114,28 +115,26 @@ class State_Manager:
             elif board[i][y] == 3:
                 break
             else:
-                moves.append((i, y))
+                moves.append( ( (x,y),(i,y) ) )
         return moves
 
     def legal_King_Moves(self, board):
-        legal_Moves = {}
+        legal_Moves = []
         for i in range(0, 9):
             for j in range(0, 9):
                 if board[i][j] == 3:
                     moves_horizontal_white = self.check_Horizontal_moves(board,(i, j))
                     moves_vertical_white = self.check_Vertical_moves(board, (i, j))
-                    legal_Moves[(i, j)] = moves_horizontal_white + moves_vertical_white
+                    legal_Moves += moves_horizontal_white + moves_vertical_white
         return legal_Moves
 
     def legal_Black_Moves(self, board):
-        legal_Moves = {}
+        legal_Moves = []
         
         for i in range(9):
             for j in range(0, 9):
                 camp = -1                   # camp -1 == the checker is not in any camp
-                moves = []
-                
-                if board[i, j] == 2:
+                if board[i, j] == BLACK:
                     if (i, j) in STARTING_BLACK:
                         if i//2 == 0: camp = 0
                         elif i//6 == 1: camp = 2
@@ -147,53 +146,52 @@ class State_Manager:
                     for jj in range(j - 1, -1, -1):
                         if camp != -1:
                             if (i, jj) in CAMPS[camp] and board[i, jj] == 0:
-                                moves.append((i, jj))
+                                legal_Moves.append( ((i,j),(i, jj)) )
                             elif board[i, jj] != 0:
                                 break
                             
                         if (i, jj) in BLOCKED_MOVES:
                             break
                         elif board[i, jj] == 0:
-                            moves.append((i, jj))
+                            legal_Moves.append(((i, j), (i, jj)))
                             
                     for jj in range(j + 1, 9):
                         if camp != -1:
                             if (i, jj) in CAMPS[camp] and board[i, jj] == 0:
-                                moves.append((i, jj))
+                                legal_Moves.append(((i, j), (i, jj)))
                             elif board[i, jj] != 0:
                                 break
                             
                         if (i, jj) in BLOCKED_MOVES:
                             break
                         elif board[i, jj] == 0:
-                            moves.append((i, jj))
+                            legal_Moves.append( ((i, j), (i, jj)) )
                         
                     # check vertical moves
                     for ii in range(i - 1, -1, -1):
                         if camp != -1:
                             if (ii, j) in CAMPS[camp] and board[ii, j] == 0:
-                                moves.append((ii, j))
+                                legal_Moves.append(((i, j), (ii, j)))
                             elif board[ii, j] != 0:
                                 break
                             
                         if (ii, j) in BLOCKED_MOVES:
                             break
                         elif board[ii, j] == 0:
-                            moves.append((ii, j))
+                            legal_Moves.append(((i, j), (ii, j)))
                     
                     for ii in range(i + 1, 9):
                         if camp != -1:
                             if (ii, j) in CAMPS[camp] and board[ii, j] == 0:
-                                moves.append((ii, j))
+                                legal_Moves.append(((i, j), (ii, j)))
                             elif board[ii, j] != 0:
                                 break
                             
                         if (ii, j) in BLOCKED_MOVES:
                             break
                         elif board[ii, j] == 0:
-                            moves.append((ii, j))
-                    
-                    legal_Moves[(i,j)] = moves
+                            legal_Moves.append(((i, j), (ii, j)))
+
         return legal_Moves
 
     def boxscore(self, i, j):
@@ -211,7 +209,7 @@ class State_Manager:
         This function returns a value in the domain [-1, 1] where 1 is for the victory of white (MAX player) and -1 for the victory of black (MIN player).
         This score is calculated basing on how many checkers are still in the board, and which boxes do they occupy. A different value is assigned to different boxes, basing on the coontrol power that box has on the board.
         This value is then added to the score if that box is occupied by WHITE, and subtracted if that box is occupied by BLACK.
-        """
+
         score = 0
         for i in range(9):
             for j in range(9):
@@ -219,6 +217,25 @@ class State_Manager:
                     score += self.boxscore(i, j)
                 elif board[i, j] == BLACK:
                     score -= self.boxscore(i, j)
+        return score
+
+        """
+        white_count = 0
+        black_count = 0
+        score = 0
+        for i in range(9):
+            for j in range(9):
+                if board[i, j] == WHITE:
+                    white_count += 1
+                elif board[i, j] == BLACK:
+                    black_count += 1
+        if self.king_position in CASTLE_NEIGHBOUR:
+            score = 0.05
+        elif self.king_position in KING_PROMISING:
+            score = 0.1
+        elif self.king_position in GOAL:
+            return 1
+        score += (white_count * 2 - black_count) / (white_count * 2 + black_count)
         return score
 
     def utility_state(self, board):
@@ -262,7 +279,9 @@ class State_Manager:
                 return -1
 
         # not in a goal state
-        return self.heuristics(board)
+        #return self.heuristics(board)
+        return np.random.rand(1)
+
 
     def finding_coord(self, board, dest_move):
         '''
@@ -320,16 +339,25 @@ class State_Manager:
         start_move = move[0]
         dest_move = move[1]
         new_board = copy.deepcopy(board)
-        # Lets move the piece
-        new_board[start_move[0], start_move[1]] = EMPTY
-        new_board[dest_move[0], dest_move[1]] = (1 if self.color == WHITE else 0)
+        win = None
+
+        if new_board[start_move[0], start_move[1]] == KING:
+            self.king_position = dest_move
+            new_board[dest_move[0], dest_move[1]] = KING
+            if dest_move in GOAL:
+                win = 1 # White win
+        else:
+            new_board[dest_move[0], dest_move[1]] = (WHITE if self.color == "WHITE" else BLACK)
         # Get the near enemies
+        new_board[start_move[0], start_move[1]] = EMPTY
         enemies = self.check_near_enemies(board, dest_move)
         if len(enemies) != 0:
             for enemy_spot in enemies:
-                if self.take(board,enemy_spot, dest_move):
+                if self.take(board, enemy_spot, dest_move) == KING:
+                    win = -1
+                if self.take(board,enemy_spot, dest_move) == True:
                     new_board[enemy_spot[0], enemy_spot[1]] = EMPTY
-        return new_board
+        return new_board, win
 
     def take(self, board, enemy_spot, dest_move):
         '''
@@ -346,7 +374,7 @@ class State_Manager:
                         board[x - 1, y] == BLACK and \
                         board[x, y + 1] == BLACK and \
                         board[x, y - 1] == BLACK:
-                    return True
+                    return KING
 
             elif (x, y) in CASTLE_NEIGHBOUR:
                 neighbours_count = 0
@@ -354,7 +382,7 @@ class State_Manager:
                     if board[coords[1], coords[0]] == BLACK:
                         neighbours_count += 1
                 if neighbours_count >= 3:
-                    return True
+                    return KING
             else:
                 # KING isn't in the castle or in its neighbourhood
                 # He is taken out as a simple soldier
@@ -363,7 +391,7 @@ class State_Manager:
                     if board[x - 1, y] == BLACK or \
                             (x - 1, y) in CAMPS or \
                             (x - 1, y) == CASTLE:
-                        return True
+                        return KING
                 if direction == "DOWN" and x + 1 <= 8:
                     if board[x + 1, y] == BLACK or \
                             (x + 1, y) in CAMPS or \

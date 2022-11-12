@@ -12,7 +12,6 @@ from aima.utils import vector_add
 GameState = namedtuple('GameState', 'to_move, utility, board, moves')
 StochasticGameState = namedtuple('StochasticGameState', 'to_move, utility, board, moves, chance')
 
-
 # ______________________________________________________________________________
 # MinMax Search
 
@@ -151,6 +150,10 @@ def alpha_beta_cutoff_search(state, game, d=4, cutoff_test=None, eval_fn=None):
         v = np.inf
         for a in game.actions(state):
             v = min(v, max_value(game.result(state, a), alpha, beta, depth + 1))
+            '''
+            if True:
+                break
+            '''
             if v <= alpha:
                 return v
             beta = min(beta, v)
@@ -158,17 +161,26 @@ def alpha_beta_cutoff_search(state, game, d=4, cutoff_test=None, eval_fn=None):
 
     # Body of alpha_beta_cutoff_search starts here:
     # The default test cuts off at depth d or at a terminal state
+    print("Sono nello state \n", state.board)
     cutoff_test = (cutoff_test or (lambda state, depth: depth > d or game.terminal_test(state)))
     eval_fn = eval_fn or (lambda state: game.utility(state, player))
     start = time.time()
     best_score = -np.inf
     beta = np.inf
     best_action = None
+    print("le mosse sono ",game.actions(state))
     for a in game.actions(state):
+        print("Sto valutando la mossa ",a)
+
         v = min_value(game.result(state, a), best_score, beta, 1)
+
+        print("La mossa vale ",v)
+
         if v > best_score:
             best_score = v
             best_action = a
+
+
     time_cost = start - time.time()
     return best_action, time_cost
 
