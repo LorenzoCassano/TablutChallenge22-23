@@ -175,7 +175,9 @@ def alpha_beta_cutoff_search(state, game, d=4, cutoff_test=None, eval_fn=None):
         if v > best_score:
             best_score = v
             best_action = a
-
+        time_cost = -(start - time.time())
+        if time_cost >= 15:
+            return best_action,time_cost
 
     time_cost = start - time.time()
     return best_action, time_cost

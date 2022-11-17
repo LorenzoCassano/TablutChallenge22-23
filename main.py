@@ -70,6 +70,7 @@ def main():
 
         # Trying first move
         move, time_cost = alpha_beta_cutoff_search(state, player, 3)
+        print("La mossa vale ",move)
         move = num_to_alphanumeric(move)
         print("Move choice ",move)
         print("Time to compute the move ",round(time_cost,2))

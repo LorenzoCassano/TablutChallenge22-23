@@ -9,8 +9,6 @@ class TablutGame(Game):
                                  utility=self.manager.heuristics(board),
                                  board = board,
                                  moves=self.manager.legalMoves(board))
-
-
     def actions(self, state):
         """Return a list of the allowable moves at this point."""
         self.manager.set_color(state.to_move)
@@ -41,9 +39,9 @@ class TablutGame(Game):
         1 for win, -1 for loss, 0 otherwise.
         """
         if state.utility == 1 and player == "WHITE":
-            return 5 - depth
+            return 10 - depth
         elif state.utility == 1 and player == "BLACK":
-            return depth - 5
+            return depth - 10
         return state.utility if player == "WHITE" else -state.utility
 
     def terminal_test(self, state):

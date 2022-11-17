@@ -152,7 +152,9 @@ class State_Manager:
                             
                         if (i, jj) in BLOCKED_MOVES:
                             break
-                        elif board[i, jj] == 0:
+                        elif board[i, jj] != 0:
+                            break
+                        else:
                             legal_Moves.append(((i, j), (i, jj)))
                             
                     for jj in range(j + 1, 9):
@@ -164,9 +166,11 @@ class State_Manager:
                             
                         if (i, jj) in BLOCKED_MOVES:
                             break
-                        elif board[i, jj] == 0:
+                        elif board[i, jj] != 0:
+                            break
+                        else:
                             legal_Moves.append( ((i, j), (i, jj)) )
-                        
+
                     # check vertical moves
                     for ii in range(i - 1, -1, -1):
                         if camp != -1:
@@ -177,7 +181,9 @@ class State_Manager:
                             
                         if (ii, j) in BLOCKED_MOVES:
                             break
-                        elif board[ii, j] == 0:
+                        elif board[ii, j] != 0:
+                            break
+                        else:
                             legal_Moves.append(((i, j), (ii, j)))
                     
                     for ii in range(i + 1, 9):
@@ -189,7 +195,9 @@ class State_Manager:
                             
                         if (ii, j) in BLOCKED_MOVES:
                             break
-                        elif board[ii, j] == 0:
+                        elif board[ii, j] != 0:
+                            break
+                        else:
                             legal_Moves.append(((i, j), (ii, j)))
 
         return legal_Moves
@@ -210,33 +218,41 @@ class State_Manager:
         This score is calculated basing on how many checkers are still in the board, and which boxes do they occupy. A different value is assigned to different boxes, basing on the coontrol power that box has on the board.
         This value is then added to the score if that box is occupied by WHITE, and subtracted if that box is occupied by BLACK.
 
+        """
+        white_count = 0
+        black_count = 0
         score = 0
+        x, y = self.king_position
         for i in range(9):
             for j in range(9):
                 if board[i, j] in (WHITE, KING):
                     score += self.boxscore(i, j)
                 elif board[i, j] == BLACK:
                     score -= self.boxscore(i, j)
-        return score
-
-        """
-        white_count = 0
-        black_count = 0
-        score = 0
-        for i in range(9):
-            for j in range(9):
                 if board[i, j] == WHITE:
                     white_count += 1
                 elif board[i, j] == BLACK:
                     black_count += 1
         if self.king_position in CASTLE_NEIGHBOUR:
-            score = 0.2
+            score += 0.2
+        elif self.king_position != CASTLE:
+            if 0 < x < 8 and 0 < y < 8:
+                if board[x - 1, y] == BLACK or board[x + 1, y] == BLACK or \
+                   board[x, y - 1] == BLACK or board[x, y + 1] == BLACK:
+                    score -= 0.2
+
             ### Only if king not in danger (black soldiers near to him (1, 2)) 
         elif self.king_position in KING_PROMISING:
-            score = 0.4
+            if 0 < x < 8 and 0 < y < 8:
+                if board[x - 1][y] == BLACK or board[x + 1][y] == BLACK or \
+                   board[x][y - 1] == BLACK or board[x][y + 1] == BLACK:
+                    score -= 0.2
+                else:
+                    score += 0.4
             ### Only if king not in danger ()
-        score += (white_count - black_count) / (white_count + black_count)    
-        return score
+
+        score += (white_count - black_count) * 2 / (white_count + black_count)
+        return score + np.random.normal(0, 0.001)
 
     def utility_state(self, board):
         # This methods return 1 if WHITE wins, -1 if BLACK wins, otherwise 0
