@@ -7,7 +7,7 @@ class TablutGame(Game):
         self.manager = State_Manager(color, king_postion)
         self.initial = GameState(to_move=color,
                                  utility=self.manager.heuristics(board),
-                                 board= board,
+                                 board = board,
                                  moves=self.manager.legalMoves(board))
 
 
@@ -24,24 +24,26 @@ class TablutGame(Game):
         board = state.board
 
         new_board, win = self.manager.board_updater(board, move)
-        #print(new_board)
-        #print("\n")
+
         new_color = ("BLACK" if state.to_move == "WHITE" else "WHITE")
         if win == None:
-            win = self.manager.heuristics(new_board)
-
+            win = self.manager.heuristics(new_board) 
         self.manager.set_color(new_color)
         return GameState(to_move=new_color,
-                         utility= win,
-                         board= new_board,
+                         utility = win,
+                         board = new_board,
                          moves=self.manager.legalMoves(new_board))
 
 
 
-    def utility(self, state, player):
+    def utility(self, state, player, depth):
         """Return the value of this final state to player.
         1 for win, -1 for loss, 0 otherwise.
         """
+        if state.utility == 1 and player == "WHITE":
+            return 5 - depth
+        elif state.utility == 1 and player == "BLACK":
+            return depth - 5
         return state.utility if player == "WHITE" else -state.utility
 
     def terminal_test(self, state):

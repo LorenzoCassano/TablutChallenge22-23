@@ -230,12 +230,12 @@ class State_Manager:
                 elif board[i, j] == BLACK:
                     black_count += 1
         if self.king_position in CASTLE_NEIGHBOUR:
-            score = 0.05
+            score = 0.2
+            ### Only if king not in danger (black soldiers near to him (1, 2)) 
         elif self.king_position in KING_PROMISING:
-            score = 0.1
-        elif self.king_position in GOAL:
-            return 1
-        score += (white_count * 2 - black_count) / (white_count * 2 + black_count)
+            score = 0.4
+            ### Only if king not in danger ()
+        score += (white_count - black_count) / (white_count + black_count)    
         return score
 
     def utility_state(self, board):
@@ -340,7 +340,7 @@ class State_Manager:
         dest_move = move[1]
         new_board = copy.deepcopy(board)
         win = None
-
+        
         if new_board[start_move[0], start_move[1]] == KING:
             self.king_position = dest_move
             new_board[dest_move[0], dest_move[1]] = KING
