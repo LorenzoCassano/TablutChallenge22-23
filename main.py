@@ -63,14 +63,27 @@ def main():
 
     while True:
       # First, get the state from the server and convert it.
+        
         state = GameState(to_move=color,
                           utility= player.manager.heuristics(board),
                           board= board,
                          moves= player.manager.legalMoves(board))
 
         # Trying first move
-        move, time_cost = alpha_beta_cutoff_search(state, player, 3)
-        print("La mossa vale ",move)
+        time_left = timeout
+        
+        # for depth in range(1, 5):
+        for depth in range(1, 4):
+            actual_move, time_cost, exit = alpha_beta_cutoff_search(state, player, time_left, depth)
+            if exit:
+                break
+            else:
+                time_left -= time_cost
+                move = actual_move
+            if time_left < 15:
+                break
+        
+        # print("La mossa vale ",move)
         move = num_to_alphanumeric(move)
         print("Move choice ",move)
         print("Time to compute the move ",round(time_cost,2))
@@ -78,11 +91,12 @@ def main():
         board, king_position = connector.get_state()
         print("Board after move")
         print(board)
+        print("BLACK SOLDIERS = {}\nWHITE PAWNS = {}".format(np.sum(board == 2), np.sum(board == 1) + 1))
         print("Waiting for enemy move....")
         board, king_position = connector.get_state()
         print("Enemy move:")
         print(board)
-
+        
     # Then, start the search for the best move
 
     # algorithm computes move --> [(i,j),(x,y)]

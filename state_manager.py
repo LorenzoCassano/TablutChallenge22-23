@@ -227,31 +227,34 @@ class State_Manager:
             for j in range(9):
                 if board[i, j] in (WHITE, KING):
                     score += self.boxscore(i, j)
-                elif board[i, j] == BLACK:
-                    score -= self.boxscore(i, j)
-                if board[i, j] == WHITE:
                     white_count += 1
                 elif board[i, j] == BLACK:
+                    score -= self.boxscore(i, j)
                     black_count += 1
         if self.king_position in CASTLE_NEIGHBOUR:
-            score += 0.2
+            score += 0.04
         elif self.king_position != CASTLE:
             if 0 < x < 8 and 0 < y < 8:
                 if board[x - 1, y] == BLACK or board[x + 1, y] == BLACK or \
                    board[x, y - 1] == BLACK or board[x, y + 1] == BLACK:
-                    score -= 0.2
-
+                    score -= 0.05
+        elif self.king_position == CASTLE:
+            if board[3, 4] == BLACK: score -= 0.02
+            if board[5, 4] == BLACK: score -= 0.02
+            if board[4, 5] == BLACK: score -= 0.02
+            if board[4, 3] == BLACK: score -= 0.02            
+            
             ### Only if king not in danger (black soldiers near to him (1, 2)) 
         elif self.king_position in KING_PROMISING:
             if 0 < x < 8 and 0 < y < 8:
                 if board[x - 1][y] == BLACK or board[x + 1][y] == BLACK or \
                    board[x][y - 1] == BLACK or board[x][y + 1] == BLACK:
-                    score -= 0.2
+                    score -= 0.02
                 else:
-                    score += 0.4
+                    score += 0.07
             ### Only if king not in danger ()
 
-        score += (white_count - black_count) * 2 / (white_count + black_count)
+        score += (white_count * 2 - black_count) / max(white_count * 2, black_count)
         return score + np.random.normal(0, 0.001)
 
     def utility_state(self, board):

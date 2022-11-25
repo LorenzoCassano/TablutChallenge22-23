@@ -126,7 +126,7 @@ def alpha_beta_search(state, game):
     return best_action
 
 
-def alpha_beta_cutoff_search(state, game, d=4, cutoff_test=None, eval_fn=None):
+def alpha_beta_cutoff_search(state, game, time_left, d=4, cutoff_test=None, eval_fn=None):
     """Search game to determine best action; use alpha-beta pruning.
     This version cuts off search and uses an evaluation function."""
     player = game.to_move(state)
@@ -160,6 +160,7 @@ def alpha_beta_cutoff_search(state, game, d=4, cutoff_test=None, eval_fn=None):
     eval_fn = eval_fn or (lambda state, depth: game.utility(state, player, depth))
     start = time.time()
 
+    threshold = 15
 
     best_score = -np.inf
     beta = np.inf
@@ -167,20 +168,21 @@ def alpha_beta_cutoff_search(state, game, d=4, cutoff_test=None, eval_fn=None):
     print("Legal moves : ", game.actions(state))
     for a in game.actions(state):
         res = game.result(state, a)
-        print("Evaluating move : ",a)
+        # print("Evaluating move : ",a)
         v = min_value(res, best_score, beta, 1)
 
-        print("Move value : ",v)
+        # print("Move value : ",v)
 
         if v > best_score:
             best_score = v
             best_action = a
+        
         time_cost = -(start - time.time())
-        if time_cost >= 15:
-            return best_action,time_cost
-
+        if time_left - time_cost < threshold or best_score == 1:
+            return best_action, time_cost, True
+        
     time_cost = start - time.time()
-    return best_action, time_cost
+    return best_action, time_cost, False
 
 
 # ______________________________________________________________________________
