@@ -4,7 +4,7 @@ Tablut Challenge: Project of Fondamentals of Artificial Intelligence Module 1.
 ## Execution
 ### Starting Phase
 Cloning the project; <br> <br>
-<code>git clone https://github.com/LorenzoCassano/TablutChallenge22-23.git</code> <br>
+<code>git clone https://github.com/LorenzoCassano/TablutChallenge22-23.git</code> <br> <br>
 Creating the virtual enviroment <br> <br>
 <code>cd TablutChallenge22-23</code> <br> <br>
 <code>python -m venv TablutChallenge22-23</code> <br><br>
