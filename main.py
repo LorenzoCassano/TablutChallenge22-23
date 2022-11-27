@@ -88,14 +88,18 @@ def main():
         print("Move choice ",move)
         print("Time to compute the move ",round(time_cost,2))
         connector.send_move(move)
-        board, king_position = connector.get_state()
-        print("Board after move")
-        print(board)
-        print("BLACK SOLDIERS = {}\nWHITE PAWNS = {}".format(np.sum(board == 2), np.sum(board == 1) + 1))
-        print("Waiting for enemy move....")
-        board, king_position = connector.get_state()
-        print("Enemy move:")
-        print(board)
+        try:
+            board, king_position = connector.get_state()
+            print("Board after move")
+            print(board)
+            print("BLACK SOLDIERS = {}\nWHITE PAWNS = {}".format(np.sum(board == 2), np.sum(board == 1) + 1))
+            print("Waiting for enemy move....")
+            board, king_position = connector.get_state()
+            print("Enemy move:")
+            print(board)
+        except Exception:
+            print("Game Finished")
+            return
         
     # Then, start the search for the best move
 

@@ -155,7 +155,7 @@ def alpha_beta_cutoff_search(state, game, time_left, d=4, cutoff_test=None, eval
 
     # Body of alpha_beta_cutoff_search starts here:
     # The default test cuts off at depth d or at a terminal state
-    print("Actual state : \n", state.board)
+
     cutoff_test = (cutoff_test or (lambda state, depth: depth > d or game.terminal_test(state)))
     eval_fn = eval_fn or (lambda state, depth: game.utility(state, player, depth))
     start = time.time()
@@ -165,7 +165,7 @@ def alpha_beta_cutoff_search(state, game, time_left, d=4, cutoff_test=None, eval
     best_score = -np.inf
     beta = np.inf
     best_action = None
-    print("Legal moves : ", game.actions(state))
+
     for a in game.actions(state):
         res = game.result(state, a)
         # print("Evaluating move : ",a)
