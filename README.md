@@ -14,7 +14,7 @@ Installing dependencies <br> <br>
 <code>python main.py [PLAYER] [TIME] [SERVER_ADDRESS]</code> <br> <br>
 If the server address is localhost the command is:<br> <br>
 <code>python main.py [PLAYER] [TIME] </code> <br> <br>
-##Authors
+## Authors
 <ul>
 <li> Cassano Lorenzo
 <li> D'Abramo Jacopo
