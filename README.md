@@ -13,7 +13,14 @@ Installing dependencies <br> <br>
 ### Code Execution
 <code>python main.py [PLAYER] [TIME] [SERVER_ADDRESS]</code> <br> <br>
 If the server address is localhost the command is:<br> <br>
-<code>python main.py [PLAYER] [TIME] </code> <br>
+<code>python main.py [PLAYER] [TIME] </code> <br> <br>
+##Authors
+<ul>
+<li> Cassano Lorenzo
+<li> D'Abramo Jacopo
+<li> Le Creuer Kilian Tiziano
+<li> Fusconi Matteo
+</ul>
 <br><br>
 ![Alt text](https://gianlucadimarzio.com/images/mbappe-image.jpg?p=14x9&s=649c557414c0085f4a9bf20b02a798fa)
 <br>
