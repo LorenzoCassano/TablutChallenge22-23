@@ -26,7 +26,7 @@ def main():
     except Exception:
         print("Not argument given")
         return
-
+    color = color.upper()
     if color != "WHITE" and color != "BLACK":
         print("The color must be WHITE or BLACK")
         return
@@ -47,8 +47,7 @@ def main():
     # Starting game
     print("Initial state:")
     board, king_position = connector.get_state()
-    print("Initial board")
-    print(board)
+    max_depth = 10
 
     player = TablutGame(color, board, king_position)
     # ONLY IF WE HAVE TO DO THE FIRST MOVE
@@ -66,14 +65,24 @@ def main():
         state = GameState(to_move=color,
                           utility= player.manager.heuristics(board),
                           board= board,
-                         moves= player.manager.legalMoves(board))
+                          moves= player.manager.legalMoves(board))
+        tresh = 3
 
-        # Trying first move
-        move, time_cost = alpha_beta_cutoff_search(state, player, 3)
-        print("La mossa vale ",move)
+        time_left = timeout
+        for depth in range(max_depth):
+            actual_move, time_cost, exit = alpha_beta_cutoff_search(state, player, time_left, depth + 1)
+            if exit:
+                break
+            else:
+                time_left -= time_cost
+                move = actual_move 
+                
+            if time_left < tresh:
+                break 
+            
         move = num_to_alphanumeric(move)
         print("Move choice ",move)
-        print("Time to compute the move ",round(time_cost,2))
+        print("Time to compute the move ", round(time_cost,2))
         connector.send_move(move)
         board, king_position = connector.get_state()
         print("Board after move")
@@ -83,16 +92,7 @@ def main():
         print("Enemy move:")
         print(board)
 
-    # Then, start the search for the best move
-
-    # algorithm computes move --> [(i,j),(x,y)]
-    # convertion in a string tuple [(from, to)]
-    # sending move
-
-    # Convert the move into alphanumerical value
-
-    # Send the move
-    # pass
+    
 
 
 main()

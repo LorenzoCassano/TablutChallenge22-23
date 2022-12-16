@@ -126,36 +126,52 @@ def alpha_beta_search(state, game):
     return best_action
 
 
-def alpha_beta_cutoff_search(state, game, d=4, cutoff_test=None, eval_fn=None):
+def alpha_beta_cutoff_search(state, game, time_left, d=4, cutoff_test=None, eval_fn=None):
     """Search game to determine best action; use alpha-beta pruning.
     This version cuts off search and uses an evaluation function."""
     player = game.to_move(state)
+
+    tresh = 3 # Seconds
     # Functions used by alpha_beta
     def max_value(state, alpha, beta, depth):
         if cutoff_test(state, depth):
             return eval_fn(state, depth)
         v = -np.inf
+       
         for a in game.actions(state):
-            v = max(v, min_value(game.result(state, a), alpha, beta, depth + 1))
-            if v >= beta:
-                return v
-            alpha = max(alpha, v)
+            if a != None:
+                v = max(v, min_value(game.result(state, a), alpha, beta, depth + 1))
+                
+                time_cost = -(start - time.time())
+                if time_left - time_cost < tresh:
+                    return -np.inf
+
+                if v >= beta:
+                    return v
+                alpha = max(alpha, v)
         return v
 
     def min_value(state, alpha, beta, depth):
         if cutoff_test(state, depth):
             return eval_fn(state, depth)
         v = np.inf
+        
         for a in game.actions(state):
-            v = min(v, max_value(game.result(state, a), alpha, beta, depth + 1))
-            if v <= alpha:
-                return v
-            beta = min(beta, v)
+            if a != None:
+                v = min(v, max_value(game.result(state, a), alpha, beta, depth + 1))
+
+                time_cost = -(start - time.time())
+                if time_left - time_cost < tresh:
+                    return np.inf
+
+                if v <= alpha:
+                    return v
+                beta = min(beta, v)
         return v
 
     # Body of alpha_beta_cutoff_search starts here:
     # The default test cuts off at depth d or at a terminal state
-    print("Actual state : \n", state.board)
+
     cutoff_test = (cutoff_test or (lambda state, depth: depth > d or game.terminal_test(state)))
     eval_fn = eval_fn or (lambda state, depth: game.utility(state, player, depth))
     start = time.time()
@@ -164,23 +180,21 @@ def alpha_beta_cutoff_search(state, game, d=4, cutoff_test=None, eval_fn=None):
     best_score = -np.inf
     beta = np.inf
     best_action = None
-    print("Legal moves : ", game.actions(state))
     for a in game.actions(state):
-        res = game.result(state, a)
-        print("Evaluating move : ",a)
-        v = min_value(res, best_score, beta, 1)
+        if a != None:
+            res = game.result(state, a)
 
-        print("Move value : ",v)
+            v = min_value(res, best_score, beta, 1)
 
-        if v > best_score:
-            best_score = v
-            best_action = a
-        time_cost = -(start - time.time())
-        if time_cost >= 15:
-            return best_action,time_cost
+            if v > best_score:
+                best_score = v
+                best_action = a
+            time_cost = -(start - time.time())
+            if time_left - time_cost < tresh or best_score == 1:
+                return best_action, time_cost, True
 
     time_cost = start - time.time()
-    return best_action, time_cost
+    return best_action, time_cost, False
 
 
 # ______________________________________________________________________________
