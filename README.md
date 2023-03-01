@@ -1,5 +1,5 @@
 # TablutChallenge22-23
-Tablut Challenge: Project of Fondamentals of Artificial Intelligence Module 1.
+Tablut Challenge: Project of Fundamentals of Artificial Intelligence Module 1.
 <br> 
 ## Execution
 ### Starting Phase
